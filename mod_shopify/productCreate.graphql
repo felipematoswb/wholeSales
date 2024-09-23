@@ -1,0 +1,45 @@
+mutation CreateProductWithOptions(
+  $input: ProductInput!
+  $media: [CreateMediaInput!]
+) {
+  productCreate(input: $input, media: $media) {
+    userErrors {
+      field
+      message
+    }
+    product {
+      id
+      title
+      media(first: 10) {
+        nodes {
+          alt
+          mediaContentType
+          preview {
+            status
+          }
+        }
+      }
+      options {
+        id
+        name
+        position
+        values
+        optionValues {
+          id
+          name
+          hasVariants
+        }
+      }
+      variants(first: 5) {
+        nodes {
+          id
+          title
+          selectedOptions {
+            name
+            value
+          }
+        }
+      }
+    }
+  }
+}

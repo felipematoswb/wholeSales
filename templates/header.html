@@ -1,0 +1,39 @@
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <div class="container-fluid col-lg-8">
+      <div class="collapse navbar-collapse" id="navbarColor01">
+        <ul class="navbar-nav me-auto">
+          
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'shopify_home' %}">Home
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Aliexpress</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{% url 'authorize_user' %}">Connect</a>
+              <a class="dropdown-item" href="{% url 'search_by_name_view' %}">Search-by-url</a>
+              <a class="dropdown-item" href="{% url 'search_by_image_view' %}">Search-by-image</a>
+              <a class="dropdown-item" href="{% url 'search_by_keywords_view' %}">Search-by-keywords</a>
+              <a class="dropdown-item" href="{% url 'categories_all' %}">Categories</a>
+              <a class="dropdown-item" href="{% url 'feedname_view' %}">Feed</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            {% if shop %}
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{shop}}</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{% url 'shopify_orders' shop %}">Orders</a>
+              <a class="dropdown-item" href="{% url 'shopify_products' shop %}">Products</a>
+            </div>
+            {% else %}
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Shopify</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{% url 'shopify_connect' %}">Connect</a>
+            </div>
+            {% endif %}
+          </li>
+         
+        </ul>
+      </div>
+    </div>
+  </nav>

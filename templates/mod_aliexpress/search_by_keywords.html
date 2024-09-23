@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container my-4">
+    <h1 class="h3 mb-3 fw-normal">Search Product by Keywords</h1>
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="keywords" class="form-label">Product Keywords:</label>
+            <input type="text" id="keywords" name="keywords" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</main>
+{% endblock %}

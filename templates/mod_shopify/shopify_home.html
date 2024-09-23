@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Available Stores</h2>
+        </div>
+        <div class="card-body">
+            {% if stores %}
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Store Name</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for store in stores %}
+                        <tr>
+                            <td>{{ store.shop_url }}</td>
+                            <td>
+                                <a href="{% url 'shopify_orders' shop=store.shop_url %}" class="btn btn-primary">
+                                    View Orders
+                                </a>
+                                <a href="{% url 'shopify_products' shop=store.shop_url %}" class="btn btn-primary">View Products
+                                </a>
+                                
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-center">No stores found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+

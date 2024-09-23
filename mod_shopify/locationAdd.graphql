@@ -1,0 +1,32 @@
+mutation {
+  locationAdd(
+    input: {
+      name: "WholeSales App"
+      address: {
+        address1: ""
+        city: ""
+        provinceCode: ""
+        countryCode: US
+        zip: ""
+      }
+      fulfillsOnlineOrders: true
+    }
+  ) {
+    location {
+      id
+      name
+      address {
+        address1
+        provinceCode
+        countryCode
+        zip
+      }
+      fulfillsOnlineOrders
+    }
+    userErrors {
+      code
+      field
+      message
+    }
+  }
+}

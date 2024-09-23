@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+    <h1>Product Details for {{ product_id }}</h1>
+    {% if feed_name %}
+        <a href="{% url 'feed_content_view' feed_name %}?category={{ selected_category }}" class="btn btn-warning">Back to Feed Content</a>
+    {% endif %}
+    {% if product_details.aliexpress_ds_product_get_response %}
+        <div class="row">
+        <!-- Send to Shopify Button -->
+        <form method="post" action="{% url 'push_product' %}">
+            <input type="hidden" name="product_id" value="{{ product_id }}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Send to Shopify</button>
+        </form>
+            <div class="col-md-6">
+                <h2>Product Details</h2>
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{error}}
+                  </div>
+                {% endif %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Basic Information -->
+                        <tr>
+                            <td>Product ID</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_item_base_info_dto.product_id }}</td>
+                        </tr>
+                        <tr>
+                            <td>Product Name</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_item_base_info_dto.subject }}</td>
+                        </tr>
+                        <tr>
+                            <td>Price</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_item_sku_info_dtos.ae_item_sku_info_d_t_o.0.offer_sale_price }} {{ product_details.aliexpress_ds_product_get_response.result.ae_item_sku_info_dtos.ae_item_sku_info_d_t_o.0.currency_code }}</td>
+                        </tr>
+                        <tr>
+                            <td>Stock</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_item_sku_info_dtos.ae_item_sku_info_d_t_o.0.sku_available_stock }}</td>
+                        </tr>
+                        <tr>
+                            <td>Average Rating</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_item_base_info_dto.avg_evaluation_rating }}</td>
+                        </tr>
+                        <tr>
+                            <td>Sales Count</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_item_base_info_dto.sales_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Evaluation Count</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_item_base_info_dto.evaluation_count }}</td>
+                        </tr>
+                        <tr>
+                            <td>Product Status</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_item_base_info_dto.product_status_type }}</td>
+                        </tr>
+                        
+                        <!-- Store Information -->
+                        <tr>
+                            <td>Store ID</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_store_info.store_id }}</td>
+                        </tr>
+                        <tr>
+                            <td>Store Name</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_store_info.store_name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Store Country</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_store_info.store_country_code }}</td>
+                        </tr>
+                        <tr>
+                            <td>Shipping Speed Rating</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_store_info.shipping_speed_rating }}</td>
+                        </tr>
+                        <tr>
+                            <td>Communication Rating</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_store_info.communication_rating }}</td>
+                        </tr>
+                        <tr>
+                            <td>Item as Described Rating</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.ae_store_info.item_as_described_rating }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+    
+
+            </div>
+
+            <div class="col-md-6">
+                <h2>Package Information</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Package Width</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.package_info_dto.package_width }}</td>
+                        </tr>
+                        <tr>
+                            <td>Package Height</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.package_info_dto.package_height }}</td>
+                        </tr>
+                        <tr>
+                            <td>Package Length</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.package_info_dto.package_length }}</td>
+                        </tr>
+                        <tr>
+                            <td>Gross Weight</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.package_info_dto.gross_weight }}</td>
+                        </tr>
+                        <tr>
+                            <td>Product Unit</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.package_info_dto.product_unit }}</td>
+                        </tr>
+
+                        <!-- Logistics Information -->
+                        <tr>
+                            <td>Delivery Time</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.logistics_info_dto.delivery_time }}</td>
+                        </tr>
+                        <tr>
+                            <td>Ship to Country</td>
+                            <td>{{ product_details.aliexpress_ds_product_get_response.result.logistics_info_dto.ship_to_country }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Product Properties -->
+                <h2>Product Properties</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for property in product_details.aliexpress_ds_product_get_response.result.ae_item_properties.ae_item_property %}
+                        <tr>
+                            <td>{{ property.attr_name }}</td>
+                            <td>{{ property.attr_value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Images -->
+                <h2>Images</h2>
+                <div class="images">
+                    {% for image_url in image_urls %}
+                        <img src="{{ image_url }}" alt="Product Image" width="100">
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <h2>AliExpress Delivery Options</h2>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th scope="col">Code</th>
+                    <th scope="col">Shipping Fee Currency</th>
+                    <th scope="col">Free Shipping</th>
+                    <th scope="col">Min Delivery Days</th>
+                    <th scope="col">Max Delivery Days</th>
+                    <th scope="col">Tracking</th>
+                    <th scope="col">Shipping Fee</th>
+                    <th scope="col">Delivery Date</th>
+                    <th scope="col">Company</th>
+                    <th scope="col">Ship From Country</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for option in delivery_options %}
+                <tr>
+                    <td>{{ option.code }}</td>
+                    <td>{{ option.shipping_fee_currency }}</td>
+                    <td>{{ option.free_shipping }}</td>
+                    <td>{{ option.min_delivery_days }}</td>
+                    <td>{{ option.max_delivery_days }}</td>
+                    <td>{{ option.tracking }}</td>
+                    <td>{{ option.shipping_fee_format }}</td>
+                    <td>{{ option.delivery_date_desc }}</td>
+                    <td>{{ option.company }}</td>
+                    <td>{{ option.ship_from_country }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- SKU Information -->
+        <h2>SKU Information</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>SKU ID</th>
+                    <th>Image</th>
+                    <th>Attributes</th>
+                    <th>Offer Sale Price</th>
+                    <th>Currency Code</th>
+                    <th>SKU Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sku in product_details.aliexpress_ds_product_get_response.result.ae_item_sku_info_dtos.ae_item_sku_info_d_t_o %}
+                <tr>
+                    <td>{{ sku.sku_attr }}</td>
+                    <td>
+                        {% for attr in sku.ae_sku_property_dtos.ae_sku_property_d_t_o %}
+                            {% if attr.sku_image %}
+                                <img src="{{ attr.sku_image }}" alt="{{ attr.sku_property_value }}" width="50">
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for attr in sku.ae_sku_property_dtos.ae_sku_property_d_t_o %}
+                        {{ attr.sku_property_name }}: {{ attr.property_value_definition_name|default:attr.sku_property_value }}<br>
+                        {% endfor %}
+                    </td>
+                    <td>{{ sku.offer_sale_price }}</td>
+                    <td>{{ sku.currency_code }}</td>
+                    <td>{{ sku.sku_available_stock }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Product Description -->
+        <h2>Product Description</h2>
+        <div class="product-description">
+            {{ product_details.aliexpress_ds_product_get_response.result.ae_item_base_info_dto.detail | safe }}
+        </div>
+        
+        
+    {% else %}
+        <p class="text-danger">No details found for this product.</p>
+    {% endif %}
+</div>
+{% endblock %}

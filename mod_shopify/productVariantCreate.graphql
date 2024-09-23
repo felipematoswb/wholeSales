@@ -1,0 +1,33 @@
+mutation productVariantsBulkCreate(
+  $productId: ID!
+  $variants: [ProductVariantsBulkInput!]!
+) {
+  productVariantsBulkCreate(productId: $productId, variants: $variants) {
+    userErrors {
+      field
+      message
+    }
+    product {
+      id
+      options {
+        id
+        name
+        values
+        position
+        optionValues {
+          id
+          name
+          hasVariants
+        }
+      }
+    }
+    productVariants {
+      id
+      title
+      selectedOptions {
+        name
+        value
+      }
+    }
+  }
+}

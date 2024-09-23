@@ -1,0 +1,16 @@
+mutation productVariantUpdate($input: ProductVariantInput!) {
+  productVariantUpdate(input: $input) {
+    productVariant {
+      id
+      title
+      inventoryPolicy
+      inventoryQuantity
+      price
+      compareAtPrice
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}

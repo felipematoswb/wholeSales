@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+    <h1 class="">Search Product by Image</h1>
+    <form method="post" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="image_file" class="form-label">Upload Image:</label>
+            <input type="file" class="form-control" id="image_file" name="image_file" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    <hr>
+    {% if response %}
+    <h2 class="">Search Results</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>Categories</th>
+                <th>Images</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in response.aliexpress_ds_image_search_response.data.products.traffic_image_product_d_t_o %}
+            <tr>
+                <td><a href="{% url 'product_detail_view' product.product_id %}">{{ product.product_id }}</a></td>
+                <td>{{ product.product_title }}</td>
+                <td>{{ product.sale_price }} {{ product.sale_price_currency }}</td>
+                <td>{{ product.discount }}</td>
+                <td>{{ product.first_level_category_name }}</td>
+                <td class="images">
+                    {% for image_url in product.product_small_image_urls.string %}
+                        <img src="{{ image_url }}" alt="Product Image" class="img-thumbnail" width="100">
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}
