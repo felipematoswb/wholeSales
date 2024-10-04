@@ -5,7 +5,7 @@ from django.db import models
 class Store(models.Model):
     shop_url = models.CharField(max_length=255, unique=True)
     access_token = models.CharField(max_length=255)
-    location_id = models.CharField(max_length=255, blank=True)
+    location_id = models.CharField(max_length=255, null=True)
 
 
 class OrderAliexpressIntegration(models.Model):

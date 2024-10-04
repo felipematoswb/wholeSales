@@ -15,11 +15,11 @@ import shopify
 SHOPIFY_API_KEY = config('API_KEY')
 SHOPIFY_SHARED_SECRET = config('SHARED_SECRET')
 REDIRECT_URI = config('REDIRECT_URI')
-SHOPIFY_SCOPES = [
-    'write_products,write_orders,read_customers,write_locations,write_inventory']
-
+SHOPIFY_SCOPES = config('SHOPIFY_SCOPES')
 
 # Início do processo OAuth
+
+
 def connect(request):
     shop_url = request.GET.get('shop')
     if not shop_url:
@@ -30,11 +30,11 @@ def connect(request):
                           secret=SHOPIFY_SHARED_SECRET)
 
     # Instanciação da sessão com o nome da loja
-    session = shopify.Session(shop_url, version='2024-07')
+    session = shopify.Session(shop_url, version='2024-10')
 
     # URL de permissão
     permission_url = session.create_permission_url(
-        scope=SHOPIFY_SCOPES, redirect_uri=REDIRECT_URI)
+        scope=[SHOPIFY_SCOPES], redirect_uri=REDIRECT_URI)
 
     return redirect(permission_url)
 
@@ -46,7 +46,7 @@ def callback(request):
     # Setup da sessão
     shopify.Session.setup(api_key=SHOPIFY_API_KEY,
                           secret=SHOPIFY_SHARED_SECRET)
-    session = shopify.Session(shop_url, version='2024-07')
+    session = shopify.Session(shop_url, version='2024-10')
     shopify.ShopifyResource.activate_session(session)
 
     # Troca do código pelo token de acesso
@@ -76,7 +76,7 @@ def home(request, *args, **kwargs):
 def orders(request, shop):
     store = Store.objects.get(shop_url=shop)
     session = shopify.Session(
-        shop, version='2024-07', token=store.access_token)
+        shop, version='2024-10', token=store.access_token)
     shopify.ShopifyResource.activate_session(session)
 
     query_orders = f'''
@@ -145,59 +145,60 @@ def orders(request, shop):
 
     # Filtrar pedidos que possuem customer
     filtered_orders = []
-    for order in orders_data:
-        node = order['node']
+    try:
+        for order in orders_data:
+            node = order['node']
 
-        if node['customer']:
-            # Extrair apenas os números do ID do pedido
-            order_id = node['id'].split('/')[-1]
+            if node['customer']:
+                # Extrair apenas os números do ID do pedido
+                order_id = node['id'].split('/')[-1]
 
-            # verifica se o pedido já foi enviado para aliexpress
-            try:
-                is_migrated = OrderAliexpressIntegration.objects.get(
-                    orderId=order_id)
+                # verifica se o pedido já foi enviado para aliexpress
+                try:
+                    is_migrated = OrderAliexpressIntegration.objects.get(
+                        orderId=order_id)
 
-                node['paid'] = is_migrated.paid
-                node['code_track'] = is_migrated.code_track
-                node['freight'] = is_migrated.freight
-            except OrderAliexpressIntegration.DoesNotExist:
-                is_migrated = None
+                    node['paid'] = is_migrated.paid
+                    node['code_track'] = is_migrated.code_track
+                    node['freight'] = is_migrated.freight
+                except OrderAliexpressIntegration.DoesNotExist:
+                    is_migrated = None
 
-            # Formatar a data de criação
-            createdAt = datetime.datetime.strptime(
-                node['createdAt'], "%Y-%m-%dT%H:%M:%SZ").strftime("%d %B %Y, %H:%M:%S")
-            node['id'] = order_id
-            node['createdAt'] = createdAt
+                # Formatar a data de criação
+                createdAt = datetime.datetime.strptime(
+                    node['createdAt'], "%Y-%m-%dT%H:%M:%SZ").strftime("%d %B %Y, %H:%M:%S")
+                node['id'] = order_id
+                node['createdAt'] = createdAt
 
-            # Comparar produtos vendidos com produtos cadastrados na base
-            can_purchase = True
-            for item in node['lineItems']['nodes']:
-                if item['product'] != None:
+                # Comparar produtos vendidos com produtos cadastrados na base
+                can_purchase = True
+                for item in node['lineItems']['nodes']:
+                    if item['product'] != None:
 
-                    sku = item['sku']
-                    is_registered = ShopifyAliexpressIntegration.objects.filter(
-                        shopifyProductId=item['product']['id'], aliexpressProductSku=sku).exists()
-                    item['is_registered'] = is_registered
-                    item['product']['id'] = item['product']['id'].split(
-                        '/')[-1]
-                    if not is_registered:
+                        sku = item['sku']
+                        is_registered = ShopifyAliexpressIntegration.objects.filter(
+                            shopifyProductId=item['product']['id'], aliexpressProductSku=sku).exists()
+                        item['is_registered'] = is_registered
+                        item['product']['id'] = item['product']['id'].split(
+                            '/')[-1]
+                        if not is_registered:
+                            can_purchase = False
+                    else:
+                        item['is_registered'] = False
                         can_purchase = False
-                else:
-                    item['is_registered'] = False
-                    can_purchase = False
 
-            node['can_purchase'] = can_purchase
-            filtered_orders.append(node)
+                node['can_purchase'] = can_purchase
+                filtered_orders.append(node)
 
         return render(request, 'mod_shopify/shopify_orders.html', {'orders': filtered_orders, 'shop': shop})
-    else:
+    except:
         return redirect('/shopify/home')
 
 
 def products(request, shop):
     store = Store.objects.get(shop_url=shop)
     session = shopify.Session(
-        shop, token=store.access_token, version='2024-07')
+        shop, token=store.access_token, version='2024-10')
     shopify.ShopifyResource.activate_session(session)
 
     # Pega todas as ordens da loja
@@ -209,7 +210,7 @@ def products(request, shop):
 def create_shopify_location(access_token, shop):
 
     session = shopify.Session(
-        shop, version='2024-07', token=access_token)
+        shop, version='2024-10', token=access_token)
     shopify.ShopifyResource.activate_session(session)
 
     graphql_path = os.path.join(os.path.dirname(
@@ -221,6 +222,7 @@ def create_shopify_location(access_token, shop):
     response = client_variant.execute(location_query)
 
     response_product = json.loads(response)
+    print(response_product)
 
     location_shopify_id = response_product["data"]["locationAdd"]["location"]["id"]
 
@@ -240,7 +242,7 @@ def pushProduct(request):
 
         store = Store.objects.get(shop_url=store_id)
         session = shopify.Session(
-            store_id, token=store.access_token, version='2024-07')
+            store_id, token=store.access_token, version='2024-10')
         shopify.ShopifyResource.activate_session(session)
 
         product_details = product_detail_get(product_id)
@@ -402,7 +404,8 @@ def pushProduct(request):
                 if count == 0:
                     if response_image_data:
                         variables = {
-                            "input": {
+                            "productId": shopify_product_id,
+                            "variants": [{
                                 "id": shopify_variant_id,
                                 "price": sku['offer_sale_price'],
                                 "mediaId": response_image_data["data"]["productCreateMedia"]["media"][0]["id"],
@@ -412,15 +415,12 @@ def pushProduct(request):
                                     "sku": sku['sku_attr'],
                                 },
                                 "inventoryPolicy": "DENY",
-                                "inventoryQuantities": {
-                                    "availableQuantity": int(sku["sku_available_stock"]),
-                                    "locationId": store.location_id
-                                }
-                            }
+                            }]
                         }
                     else:
                         variables = {
-                            "input": {
+                            "productId": shopify_product_id,
+                            "variants": [{
                                 "id": shopify_variant_id,
                                 "price": sku['offer_sale_price'],
                                 "inventoryItem": {
@@ -429,11 +429,7 @@ def pushProduct(request):
                                     "sku": sku['sku_attr'],
                                 },
                                 "inventoryPolicy": "DENY",
-                                "inventoryQuantities": {
-                                    "availableQuantity": int(sku["sku_available_stock"]),
-                                    "locationId": store.location_id
-                                }
-                            }
+                            }]
                         }
 
                     activate_inventory = {
@@ -469,6 +465,7 @@ def pushProduct(request):
 
                     response = client.execute(
                         query=variant_update_query, variables=variables)
+                    print(json.loads(response))
                     count = count + 1
                 else:
 
@@ -565,7 +562,7 @@ def purchase_order(request):
 
     store = Store.objects.get(shop_url=store_id)
     session = shopify.Session(
-        store_id, token=store.access_token, version='2024-07')
+        store_id, token=store.access_token, version='2024-10')
     shopify.ShopifyResource.activate_session(session)
 
     order = OrderAliexpressIntegration.objects.filter(

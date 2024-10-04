@@ -1,4 +1,3 @@
-
 import requests
 import hashlib
 import hmac
@@ -11,6 +10,11 @@ import json
 
 APPKEY_ALIEXPRESS = config('APPKEY_ALIEXPRESS')
 APPSECRET_ALIEXPRESS = config('APPSECRET_ALIEXPRESS')
+URL_REST = "https://api-sg.aliexpress.com/rest"
+URL_SYNC = "https://api-sg.aliexpress.com/sync"
+LANGUAGE = config("LANGUAGE")
+CURRENCY = config("CURRENCY")
+COUNTRY = config("COUNTRY")
 
 
 def get_authorization_url(redirect_uri):
@@ -216,7 +220,7 @@ def feedname_get(url, app_signature):
     return response_data
 
 
-def feed_content_get(url, category_id, feed_name, target_currency='BRL', target_language='PT', page_size=30, sort='DSRratingDesc', page_no=1):
+def feed_content_get(url, category_id, feed_name, target_currency=CURRENCY, target_language=LANGUAGE, page_size=30, sort='DSRratingDesc', page_no=1):
     method = "aliexpress.ds.recommend.feed.get"
     timestamp = str(int(time.time() * 1000))
 
@@ -312,7 +316,6 @@ def categories_get_all(access_token, url):
 
 
 def product_keywords_get(keywords):
-    url = "https://api-sg.aliexpress.com/sync"
     api_name = "aliexpress.ds.text.search"
 
     # Codificar as palavras-chave para a URL
@@ -326,9 +329,9 @@ def product_keywords_get(keywords):
         'method': api_name,
         'keyWord': encoded_keywords,
         'local': 'zh_CN',
-        'countryCode': 'BR',
+        'countryCode': COUNTRY,
         'sortBy': 'orders',
-        'currency': 'BRL',
+        'currency': CURRENCY,
         'pageSize': 20,
         'pageIndex': 1
     }
@@ -342,7 +345,7 @@ def product_keywords_get(keywords):
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
     }
 
-    response = requests.post(url, data=parameters)
+    response = requests.post(URL_SYNC, data=parameters)
 
     # Verificar e retornar o resultado
     if response.status_code == 200:
@@ -352,7 +355,6 @@ def product_keywords_get(keywords):
 
 
 def product_detail_get(product_id):
-    url = "https://api-sg.aliexpress.com/sync"
     api_name = "aliexpress.ds.product.get"
     parameters = {
         'app_key': APPKEY_ALIEXPRESS,
@@ -360,18 +362,18 @@ def product_detail_get(product_id):
         'sign_method': 'sha256',
         'product_id': product_id,
         'method': api_name,
-        'ship_to_country': "BR",
-        'target_currency': 'BRL',
-        'target_language': 'pt_BR'
+        'ship_to_country': f'{COUNTRY}',
+        'target_currency': CURRENCY,
+        'target_language': LANGUAGE
     }
+
     parameters['sign'] = generate_sign(
         APPSECRET_ALIEXPRESS, api_name, parameters)
-    response = requests.post(url, data=parameters)
+    response = requests.post(URL_SYNC, data=parameters)
     return response.json()
 
 
 def calculate_freight(product_id, quantity, ship_to_country, selected_sku_id, language, currency, source, locale):
-    url = "https://api-sg.aliexpress.com/sync"
     api_name = "aliexpress.ds.freight.query"
     query_delivery_req = {
         'quantity': quantity,
@@ -394,14 +396,13 @@ def calculate_freight(product_id, quantity, ship_to_country, selected_sku_id, la
     parameters['sign'] = generate_sign(
         APPSECRET_ALIEXPRESS, api_name, parameters)
 
-    response = requests.post(url, data=parameters)
+    response = requests.post(URL_SYNC, data=parameters)
 
     return response.json()
 
 
 def send_order_post(product_items, logistics_address, order_id, access_token):
 
-    url = "https://api-sg.aliexpress.com/sync"
     api_name = "aliexpress.ds.order.create"
 
     # Preparar os dados do pedido
@@ -425,5 +426,5 @@ def send_order_post(product_items, logistics_address, order_id, access_token):
     parameters['sign'] = generate_sign(
         APPSECRET_ALIEXPRESS, api_name, parameters)
 
-    response = requests.post(url, data=parameters)
+    response = requests.post(URL_SYNC, data=parameters)
     return response.json()

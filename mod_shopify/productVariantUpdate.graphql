@@ -1,12 +1,13 @@
-mutation productVariantUpdate($input: ProductVariantInput!) {
-  productVariantUpdate(input: $input) {
-    productVariant {
+mutation productVariantsBulkUpdate(
+  $productId: ID!
+  $variants: [ProductVariantsBulkInput!]!
+) {
+  productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+    product {
       id
-      title
-      inventoryPolicy
-      inventoryQuantity
-      price
-      compareAtPrice
+    }
+    productVariants {
+      id
     }
     userErrors {
       field

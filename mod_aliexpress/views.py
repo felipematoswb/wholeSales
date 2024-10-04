@@ -2,12 +2,13 @@ from django.shortcuts import redirect, render
 from django.http import JsonResponse
 from .utils import get_authorization_url, get_access_token, search_by_image, feedname_get, feed_content_get, product_detail_get, categories_get_all, calculate_freight, product_keywords_get
 from django.core.paginator import Paginator
+from decouple import config
 
 URL_REST = "https://api-sg.aliexpress.com/rest"
 URL_SYNC = "https://api-sg.aliexpress.com/sync"
-LANGUAGE = "BR"
-CURRENCY = "BRL"
-COUNTRY = "BR"
+LANGUAGE = config("LANGUAGE")
+CURRENCY = config("CURRENCY")
+COUNTRY = config("COUNTRY")
 
 
 def authorize_view(request):
@@ -104,8 +105,6 @@ def search_by_name_view(request):
                 'image_urls': image_urls,
                 'delivery_options': freight_response['aliexpress_ds_freight_query_response']['result']['delivery_options']['delivery_option_d_t_o']
             }
-
-            print(freight_response)
 
             return render(request, 'mod_aliexpress/product_detail.html', context)
         else:

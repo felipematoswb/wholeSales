@@ -28,8 +28,6 @@
                     <td>{{ order.createdAt }}</td>
                     <td>
                         <a href="#" class="btn btn-primary">View</a>
-                    </td>
-                    <td>
                         {% if order.can_purchase %}
                             {% if order.paid and order.code_track and order.freight %}
                                 <button class="btn btn-secondary" disabled>Finalized</button>
