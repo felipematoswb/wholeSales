@@ -1,101 +1,108 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container my-4">
-    <h1 class="">Feed Content for {{ feed_name }}</h1>
-    <a href="{% url 'feedname_view' %}" class="btn btn-warning">Back to Feed List</a>
-
-    <form method="get" class="mb-4">
-        <input type="hidden" name="feed_name" value="{{ feed_name }}">
-        <div class="mb-3">
-            <label for="category" class="form-label">Filter by Category:</label>
-            <select id="category" name="category" class="form-select">
-                <option value="">All Categories</option>
-                {% for cat_id, cat_data in categories.items %}
-                    <option value="{{ cat_id }}" {% if cat_id|stringformat:"s" == selected_category %}selected{% endif %}>{{ cat_data.name }}</option>
-                    {% if cat_data.subcategories %}
-                        {% for subcat in cat_data.subcategories %}
-                            <option value="{{ subcat.category_id }}" {% if subcat.category_id|stringformat:"s" == selected_category %}selected{% endif %}>- {{ subcat.category_name }}</option>
-                        {% endfor %}
+    <div class="container my-4">
+        <h1 class="">Feed Content for {{ feed_name }}</h1>
+        <a href="{% url 'feedname_view' %}" class="btn btn-warning">Back to Feed List</a>
+        <form method="get" class="mb-4">
+            <input type="hidden" name="feed_name" value="{{ feed_name }}">
+            <div class="mb-3">
+                <label for="category" class="form-label">Filter by Category:</label>
+                <select id="category" name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat_id, cat_data in categories.items %}
+                        <option value="{{ cat_id }}"
+                                {% if cat_id|stringformat:"s" == selected_category %}selected{% endif %}>
+                            {{ cat_data.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+        {% if response.aliexpress_ds_recommend_feed_get_response %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Currency</th>
+                        <th>Discount</th>
+                        <th>Rating</th>
+                        <th>Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in response.aliexpress_ds_recommend_feed_get_response.result.products.traffic_product_d_t_o %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'product_detail_view' product.product_id %}?feed_name={{ feed_name }}&category={{ selected_category }}">{{ product.product_id }}</a>
+                            </td>
+                            <td>{{ product.product_title }}</td>
+                            <td>{{ product.target_sale_price }}</td>
+                            <td>{{ product.target_sale_price_currency }}</td>
+                            <td>{{ product.discount }}</td>
+                            <td>{{ product.evaluate_rate }}</td>
+                            <td>
+                                <img src="{{ product.product_main_image_url }}"
+                                     alt="{{ product.product_title }}"
+                                     width="100">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if current_page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page=1&category={{ selected_category }}"
+                               aria-label="First">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ current_page|add:'-1' }}&category={{ selected_category }}"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&lsaquo;</span>
+                            </a>
+                        </li>
                     {% endif %}
-                {% endfor %}
-            </select>
-            
-        </div>
-        <button type="submit" class="btn btn-primary">Filter</button>
-    </form>
-
-    {% if response.aliexpress_ds_recommend_feed_get_response %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Product ID</th>
-                <th>Product Name</th>
-                <th>Price</th>
-                <th>Currency</th>
-                <th>Discount</th>
-                <th>Rating</th>
-                <th>Image</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in response.aliexpress_ds_recommend_feed_get_response.result.products.traffic_product_d_t_o %}
-            <tr>
-                <td><a href="{% url 'product_detail_view' product.product_id %}?feed_name={{ feed_name }}&category={{ selected_category }}">{{ product.product_id }}</a></td>
-                <td>{{ product.product_title }}</td>
-                <td>{{ product.target_sale_price }}</td>
-                <td>{{ product.target_sale_price_currency }}</td>
-                <td>{{ product.discount }}</td>
-                <td>{{ product.evaluate_rate }}</td>
-                <td>
-                    <img src="{{ product.product_main_image_url }}" alt="{{ product.product_title }}" width="100">
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            {% if current_page > 1 %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1&category={{ selected_category }}" aria-label="First">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ current_page|add:'-1' }}&category={{ selected_category }}" aria-label="Previous">
-                    <span aria-hidden="true">&lsaquo;</span>
-                </a>
-            </li>
-            {% endif %}
-
-            {% for num in page_range %}
-            {% if num == current_page %}
-            <li class="page-item active" aria-current="page">
-                <a class="page-link" href="?page={{ num }}&category={{ selected_category }}">{{ num }}</a>
-            </li>
-            {% else %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ num }}&category={{ selected_category }}">{{ num }}</a>
-            </li>
-            {% endif %}
-            {% endfor %}
-
-            {% if current_page < total_pages %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ current_page|add:'1' }}&category={{ selected_category }}" aria-label="Next">
-                    <span aria-hidden="true">&rsaquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ total_pages }}&category={{ selected_category }}" aria-label="Last">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% else %}
-    <p class="text-danger">No products found for this feed.</p>
-    {% endif %}
-</div>
+                    {% for num in page_range %}
+                        {% if num == current_page %}
+                            <li class="page-item active" aria-current="page">
+                                <a class="page-link"
+                                   href="?page={{ num }}&category={{ selected_category }}">{{ num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ num }}&category={{ selected_category }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if current_page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ current_page|add:'1' }}&category={{ selected_category }}"
+                               aria-label="Next">
+                                <span aria-hidden="true">&rsaquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ total_pages }}&category={{ selected_category }}"
+                               aria-label="Last">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <p class="text-danger">No products found for this feed.</p>
+        {% endif %}
+    </div>
 {% endblock %}

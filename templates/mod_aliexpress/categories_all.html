@@ -1,20 +1,22 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="container my-4">
-    <h1>Categories</h1>
-    <ul>
-        {% for cat_id, cat_data in categories.items %}
-        <li>{{ cat_data.name }}
-            {% if cat_data.subcategories %}
-            <ul>
-                {% for subcat in cat_data.subcategories %}
-                <li>{{ subcat.category_name }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+    <div class="container my-4">
+        <h1>Categories</h1>
+        <ul>
+            {% for cat_id, cat_data in categories.items %}
+                <li>
+                    <strong>ID:</strong> <a href="{% url 'category_feed_view' cat_data.category_id %}">{{ cat_data.category_id }} - {{ cat_data.name }}</a>
+                    {% if cat_data.subcategories %}
+                        <ul>
+                            {% for subcat in cat_data.subcategories %}
+                                <li>
+                                    <strong>ID:</strong>{{ subcat.category_id }} - {{ subcat.name }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

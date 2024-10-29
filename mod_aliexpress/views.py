@@ -48,24 +48,41 @@ def extract_product_id(product_url):
 
 
 def search_by_keywords_view(request):
-
     context = {}
 
     if request.method == 'POST':
         keywords = request.POST.get('keywords')
-
         access_token = request.session.get('access_token_response')
 
         if not access_token:
             return JsonResponse({'error': 'No access token available'}, status=400)
 
-        product_keywords = product_keywords_get(keywords)
+        product_keywords = product_keywords_get(
+            keywords, access_token['access_token'])
+        # Acessa as chaves de forma segura
+        aliexpress_response = product_keywords.get(
+            'aliexpress_ds_text_search_response', {})
+        data = aliexpress_response.get('data', {})
+        products = data.get('products', {}).get('selection_search_product', [])
 
-        print(product_keywords)
+        # Armazenar os produtos na sessão
+        request.session['products'] = products
 
-        return render(request, 'mod_aliexpress/search_by_keywords.html', context)
-    else:
-        return render(request, 'mod_aliexpress/search_by_keywords.html', context)
+        return redirect('search_by_keywords_view')
+
+    # Recuperar os produtos da sessão
+    products = request.session.get('products', [])
+
+    # Paginação
+    paginator = Paginator(products, 10)  # 10 produtos por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj
+    }
+
+    return render(request, 'mod_aliexpress/search_by_keywords.html', context)
 
 
 def search_by_name_view(request):
@@ -190,12 +207,42 @@ def feed_content_view(request, feed_name):
     return render(request, 'mod_aliexpress/feedname_content.html', context)
 
 
+def category_feed_view(request, id):
+
+    page_no = int(request.GET.get('page', 1))
+    page_size = 10
+    feed_name = 'AEB_US Local Items'
+
+    response = feed_content_get(
+        URL_SYNC, id, feed_name, page_no=page_no, page_size=page_size)
+
+    products = response['aliexpress_ds_recommend_feed_get_response']['result']['products']['traffic_product_d_t_o']
+    total_count = response['aliexpress_ds_recommend_feed_get_response']['result']['total_record_count']
+
+    total_pages = (total_count // page_size) + \
+        (1 if total_count % page_size > 0 else 0)
+    page_range = range(max(1, page_no - 2), min(total_pages + 1, page_no + 3))
+
+    context = {
+        'feed_name': feed_name,
+        'response': response,
+        'products': products,
+        'total_pages': total_pages,
+        'current_page': page_no,
+        'page_range': page_range,
+    }
+
+    return render(request, 'mod_aliexpress/category_feed.html', context)
+
+
 def product_detail_view(request, product_id):
     feed_name = request.GET.get('feed_name', '')
     selected_category = request.GET.get('category', '')
 
+    token = request.session.get('access_token_response')
+
     # Pegar detalhes do produto
-    product_details = product_detail_get(product_id)
+    product_details = product_detail_get(product_id, token['access_token'])
 
     # Salvar dados do produto na sessão
     request.session['product_details'] = product_details
@@ -205,7 +252,7 @@ def product_detail_view(request, product_id):
 
     # Calcular frete
     freight_response = calculate_freight(product_id, 1, COUNTRY, product_details['aliexpress_ds_product_get_response'][
-        'result']['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'][0]['sku_id'], "pt_BR", CURRENCY, "CN", "zh_CN")
+        'result']['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'][0]['sku_id'], "pt_BR", CURRENCY, "CN", "zh_CN", token['access_token'])
 
     context = {
         'product_id': product_id,

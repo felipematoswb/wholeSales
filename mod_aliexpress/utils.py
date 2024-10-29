@@ -220,7 +220,7 @@ def feedname_get(url, app_signature):
     return response_data
 
 
-def feed_content_get(url, category_id, feed_name, target_currency=CURRENCY, target_language=LANGUAGE, page_size=30, sort='DSRratingDesc', page_no=1):
+def feed_content_get(url, category_id, feed_name, target_currency=CURRENCY, target_language=LANGUAGE, page_size=30, sort='volumeDesc', page_no=1):
     method = "aliexpress.ds.recommend.feed.get"
     timestamp = str(int(time.time() * 1000))
 
@@ -295,17 +295,25 @@ def categories_get_all(access_token, url):
         for category in categories:
             if isinstance(category, dict):  # Ensure category is a dict
                 parent_id = category.get('parent_category_id')
+                category_id = category.get('category_id')
+
                 if parent_id:
+                    # Categoria é uma subcategoria
                     if parent_id not in organized_categories:
                         organized_categories[parent_id] = {
+                            'category_id': parent_id,
                             'name': next((cat['category_name'] for cat in categories if cat.get('category_id') == parent_id), 'Unknown'),
                             'subcategories': []
                         }
-                    organized_categories[parent_id]['subcategories'].append(
-                        category)
+                    organized_categories[parent_id]['subcategories'].append({
+                        'category_id': category_id,
+                        'name': category.get('category_name', 'Unknown')
+                    })
                 else:
-                    if category.get('category_id') not in organized_categories:
-                        organized_categories[category.get('category_id')] = {
+                    # Categoria é uma categoria principal
+                    if category_id not in organized_categories:
+                        organized_categories[category_id] = {
+                            'category_id': category_id,
                             'name': category.get('category_name', 'Unknown'),
                             'subcategories': []
                         }
@@ -315,37 +323,38 @@ def categories_get_all(access_token, url):
         return {}
 
 
-def product_keywords_get(keywords):
-    api_name = "aliexpress.ds.text.search"
-
-    # Codificar as palavras-chave para a URL
-    encoded_keywords = quote(keywords)
+def product_keywords_get(keywords, access_token):
+    method = "aliexpress.ds.text.search"
 
     # Parâmetros da requisição
-    parameters = {
+    params = {
+        'access_token': access_token,
         'app_key': APPKEY_ALIEXPRESS,
         'timestamp': str(int(time.time() * 1000)),
         'sign_method': 'sha256',
-        'method': api_name,
-        'keyWord': encoded_keywords,
+        'method': method,
+        'keyWord': keywords,
         'local': 'zh_CN',
         'countryCode': COUNTRY,
-        'sortBy': 'orders',
+        'sortBy': 'orders,desc',
         'currency': CURRENCY,
-        'pageSize': 20,
-        'pageIndex': 1
+        'pageSize': 50,
+        'pageIndex': 1,
+
     }
 
-    # Gerar a assinatura
-    parameters['sign'] = generate_sign(
-        APPSECRET_ALIEXPRESS, api_name, parameters)
+    # Generate the sign
+    sign_value = generate_sign(APPSECRET_ALIEXPRESS, method, params)
+    params['sign'] = sign_value
 
-    # Fazer a requisição POST
+    full_url = construct_full_url(URL_SYNC, params)
+
+    # Assemble HTTP request
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
     }
 
-    response = requests.post(URL_SYNC, data=parameters)
+    response = requests.post(full_url, headers=headers)
 
     # Verificar e retornar o resultado
     if response.status_code == 200:
@@ -354,9 +363,10 @@ def product_keywords_get(keywords):
         return {'error': f"Request failed with status code {response.status_code}"}
 
 
-def product_detail_get(product_id):
+def product_detail_get(product_id, access_token):
     api_name = "aliexpress.ds.product.get"
     parameters = {
+        'access_token': access_token,
         'app_key': APPKEY_ALIEXPRESS,
         'timestamp': str(int(time.time() * 1000)),
         'sign_method': 'sha256',
@@ -373,7 +383,7 @@ def product_detail_get(product_id):
     return response.json()
 
 
-def calculate_freight(product_id, quantity, ship_to_country, selected_sku_id, language, currency, source, locale):
+def calculate_freight(product_id, quantity, ship_to_country, selected_sku_id, language, currency, source, locale, token):
     api_name = "aliexpress.ds.freight.query"
     query_delivery_req = {
         'quantity': quantity,
@@ -390,7 +400,8 @@ def calculate_freight(product_id, quantity, ship_to_country, selected_sku_id, la
         'timestamp': str(int(time.time() * 1000)),
         'sign_method': 'sha256',
         'queryDeliveryReq': json.dumps(query_delivery_req),
-        'method': api_name
+        'method': api_name,
+        'access_token': token
     }
 
     parameters['sign'] = generate_sign(

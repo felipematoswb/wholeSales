@@ -17,5 +17,7 @@ urlpatterns = [
     path('product/<str:product_id>/',
          views.product_detail_view, name='product_detail_view'),
     path('categories/', views.get_categories_view, name='categories_all'),
+    path('categories/<int:id>', views.category_feed_view,
+         name='category_feed_view'),
     path('calculate_freight/', views.calculate_freight, name='calculate_freight'),
 ]

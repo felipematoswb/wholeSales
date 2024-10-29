@@ -407,7 +407,7 @@ def pushProduct(request):
                             "productId": shopify_product_id,
                             "variants": [{
                                 "id": shopify_variant_id,
-                                "price": sku['offer_sale_price'],
+                                "price": str(round(((float(sku['offer_sale_price']) * config('PRICE_USD', cast=float)) + config('VALOR_FRETE', cast=float)) * config('MARGIN_PRICE', cast=float), 2)),
                                 "mediaId": response_image_data["data"]["productCreateMedia"]["media"][0]["id"],
                                 "inventoryItem": {
                                     "requiresShipping": True,
@@ -422,7 +422,7 @@ def pushProduct(request):
                             "productId": shopify_product_id,
                             "variants": [{
                                 "id": shopify_variant_id,
-                                "price": sku['offer_sale_price'],
+                                "price": str(round(((float(sku['offer_sale_price']) * config('PRICE_USD', cast=float)) + config('VALOR_FRETE', cast=float)) * config('MARGIN_PRICE', cast=float), 2)),
                                 "inventoryItem": {
                                     "requiresShipping": True,
                                     "tracked": True,
@@ -465,7 +465,6 @@ def pushProduct(request):
 
                     response = client.execute(
                         query=variant_update_query, variables=variables)
-                    print(json.loads(response))
                     count = count + 1
                 else:
 
@@ -490,7 +489,7 @@ def pushProduct(request):
                             "productId": shopify_product_id,
                             "variants": [{
                                 "optionValues": optionValues,
-                                "price": sku['offer_sale_price'],
+                                "price": str(round(((float(sku['offer_sale_price']) * config('PRICE_USD', cast=float)) + config('VALOR_FRETE', cast=float)) * config('MARGIN_PRICE', cast=float), 2)),
                                 "mediaId": response_image_data["data"]["productCreateMedia"]["media"][0]["id"],
                                 "inventoryItem": {
                                     "requiresShipping": True,
@@ -509,7 +508,7 @@ def pushProduct(request):
                             "productId": shopify_product_id,
                             "variants": [{
                                 "optionValues": optionValues,
-                                "price": sku['offer_sale_price'],
+                                "price": str(round(((float(sku['offer_sale_price']) * config('PRICE_USD', cast=float)) + config('VALOR_FRETE', cast=float)) * config('MARGIN_PRICE', cast=float), 2)),
                                 "inventoryItem": {
                                     "requiresShipping": True,
                                     "tracked": True,
