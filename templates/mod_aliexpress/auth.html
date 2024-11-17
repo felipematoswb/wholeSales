@@ -1,29 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-    <main class="col-lg-12">
-        
-        <h1 class="h3 mb-3 fw-normal">AliExpress Authentication Response</h1>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th scope="col">Key</th>
-                    <th scope="col">Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for key, value in response.items %}
-                <tr class="table-default">
-                    <td data-label="Key">{{ key }}</td>
-                    <td data-label="Value">
-                        {% if value is mapping or value is sequence %}
-                            <pre>{{ value|json_script }}</pre>
-                        {% else %}
-                            {{ value }}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <main class="max-w-8xl mx-auto my-8 p-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">AliExpress Authentication Response</h1>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-700 bg-white rounded-lg dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-4 py-3">Key</th>
+                        <th scope="col" class="px-4 py-3">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in response.items %}
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 transition duration-300">
+                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ key }}</td>
+                            <td class="px-4 py-3">
+                                {% if value is mapping or value is sequence %}
+                                    <pre class="bg-gray-100 p-2 rounded-md text-sm text-gray-800">{{ value|json_script }}</pre>
+                                {% else %}
+                                    <span class="text-gray-700">{{ value }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </main>
 {% endblock %}

@@ -101,7 +101,8 @@ def search_by_name_view(request):
             if not access_token:
                 return JsonResponse({'error': 'No access token available'}, status=400)
 
-            product_details = product_detail_get(product_id)
+            product_details = product_detail_get(
+                product_id, access_token['access_token'])
 
             # Salvar dados do produto na sessão
             request.session['product_details'] = product_details
@@ -111,7 +112,7 @@ def search_by_name_view(request):
 
             # Calcular frete
             freight_response = calculate_freight(product_id, 1, COUNTRY, product_details['aliexpress_ds_product_get_response'][
-                                                 'result']['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'][0]['sku_id'], "pt_BR", "BRL", "CN", "zh_CN")
+                                                 'result']['ae_item_sku_info_dtos']['ae_item_sku_info_d_t_o'][0]['sku_id'], "pt_BR", "BRL", "CN", "zh_CN", access_token['access_token'])
 
             context = {
                 'product_id': product_id,

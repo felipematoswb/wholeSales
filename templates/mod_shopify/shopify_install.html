@@ -1,18 +1,24 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="container my-4">
-    <h1 class="text-center">Shopify Install</h1>
-    <div class="card p-4 mt-3">
+    <div class="max-w-4xl mx-auto my-8 p-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Shopify Install</h1>
         <form method="get" action="{% url 'shopify_connect' %}">
-            <div class="form-group">
-                <label for="shop">Enter your Shopify store name (e.g., mystore.myshopify.com):</label>
-                <input type="text" id="shop" name="shop" class="form-control" placeholder="Your store name" required>
+            <div class="mb-4">
+                <label for="shop" class="block text-lg font-medium text-gray-700 mb-2">
+                    Enter your Shopify store name (e.g., mystore.myshopify.com):
+                </label>
+                <input type="text"
+                       id="shop"
+                       name="shop"
+                       class="w-full p-3 text-sm border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Your store name"
+                       required>
             </div>
-            <div class="mt-3">
-                <input type="submit" value="Install App" class="btn btn-primary">
+            <div class="text-center mt-6">
+                <input type="submit"
+                       value="Install App"
+                       class="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
             </div>
         </form>
     </div>
-</div>
 {% endblock %}

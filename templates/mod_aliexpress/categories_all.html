@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="container my-4">
-        <h1>Categories</h1>
-        <ul>
+    <div class="max-w-8xl mx-auto my-10 p-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">Categories</h1>
+        <ul class="space-y-4">
             {% for cat_id, cat_data in categories.items %}
                 <li>
-                    <strong>ID:</strong> <a href="{% url 'category_feed_view' cat_data.category_id %}">{{ cat_data.category_id }} - {{ cat_data.name }}</a>
+                    <div class="flex items-center mb-2">
+                        <strong class="mr-2 text-gray-600">ID:</strong>
+                        <a href="{% url 'category_feed_view' cat_data.category_id %}"
+                           class="text-blue-600 hover:underline font-semibold">
+                            {{ cat_data.category_id }} - {{ cat_data.name }}
+                        </a>
+                    </div>
                     {% if cat_data.subcategories %}
-                        <ul>
+                        <ul class="ml-6 space-y-2">
                             {% for subcat in cat_data.subcategories %}
-                                <li>
-                                    <strong>ID:</strong>{{ subcat.category_id }} - {{ subcat.name }}
+                                <li class="flex items-center">
+                                    <strong class="mr-2 text-gray-600">ID:</strong>{{ subcat.category_id }} - {{ subcat.name }}
                                 </li>
                             {% endfor %}
                         </ul>

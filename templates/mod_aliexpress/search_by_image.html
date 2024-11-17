@@ -1,46 +1,67 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container my-4">
-    <h1 class="">Search Product by Image</h1>
-    <form method="post" enctype="multipart/form-data" class="mb-4">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="image_file" class="form-label">Upload Image:</label>
-            <input type="file" class="form-control" id="image_file" name="image_file" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Search</button>
-    </form>
-    
-    {% if response %}
-    <h2 class="">Search Results</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Product ID</th>
-                <th>Product Name</th>
-                <th>Price</th>
-                <th>Discount</th>
-                <th>Categories</th>
-                <th>Images</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in response.aliexpress_ds_image_search_response.data.products.traffic_image_product_d_t_o %}
-            <tr>
-                <td><a href="{% url 'product_detail_view' product.product_id %}">{{ product.product_id }}</a></td>
-                <td>{{ product.product_title }}</td>
-                <td>{{ product.sale_price }} {{ product.sale_price_currency }}</td>
-                <td>{{ product.discount }}</td>
-                <td>{{ product.first_level_category_name }}</td>
-                <td class="images">
-                    {% for image_url in product.product_small_image_urls.string %}
-                        <img src="{{ image_url }}" alt="Product Image" class="img-thumbnail" width="100">
-                    {% endfor %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-</div>
+    <div class="max-w-8xl mx-auto my-8 p-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">Search Product by Image</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="image_file" class="block text-lg font-medium text-gray-700 mb-2">Upload Image:</label>
+                <div class="flex items-center space-x-4">
+                    <input type="file"
+                           id="image_file"
+                           name="image_file"
+                           class="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                           required>
+                    <button type="submit"
+                            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Search
+                    </button>
+                </div>
+            </div>
+        </form>
+        {% if response %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th class="py-3 px-6 text-left font-semibold">Product ID</th>
+                            <th class="py-3 px-6 text-left font-semibold">Product Link</th>
+                            <th class="py-3 px-6 text-left font-semibold">Product Name</th>
+                            <th class="py-3 px-6 text-left font-semibold">Price</th>
+                            <th class="py-3 px-6 text-left font-semibold">Discount</th>
+                            <th class="py-3 px-6 text-left font-semibold">Categories</th>
+                            <th class="py-3 px-6 text-left font-semibold">Images</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in response.aliexpress_ds_image_search_response.data.products.traffic_image_product_d_t_o %}
+                            <tr class="border-b hover:bg-gray-100 transition duration-300">
+                                <td class="py-4 px-6">
+                                    <a href="{% url 'product_detail_view' product.product_id %}"
+                                       class="text-blue-600 font-medium hover:underline">{{ product.product_id }}</a>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <a href="{{ product.product_detail_url }}"
+                                       class="text-blue-600 font-medium hover:underline">View ALI</a>
+                                </td>
+                                <td class="py-4 px-6">{{ product.product_title }}</td>
+                                <td class="py-4 px-6">{{ product.sale_price }} {{ product.sale_price_currency }}</td>
+                                <td class="py-4 px-6">{{ product.discount }}</td>
+                                <td class="py-4 px-6">{{ product.first_level_category_name }}</td>
+                                <td class="py-4 px-6">
+                                    <div class="flex space-x-2">
+                                        {% for image_url in product.product_small_image_urls.string %}
+                                            <img src="{{ image_url }}"
+                                                 alt="Product Image"
+                                                 class="w-20 h-20 object-cover rounded-lg">
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

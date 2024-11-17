@@ -1,81 +1,92 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="container my-4">
-        <h1>{{ feed_name }} Feed Products</h1>
+    <div class="max-w-8xl mx-auto my-8 p-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">{{ feed_name }} Feed Products</h1>
         {% if products %}
-            <div class="container my-4">
-                <h2 class="mb-3">Products from Feed</h2>
-                <table class="table table-striped">
-                    <thead>
+            <div class="overflow-x-auto shadow-md sm:rounded-lg">
+                <table class="w-full text-sm text-left text-gray-700 bg-white rounded-lg dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
-                            <th>Product ID</th>
-                            <th>Product Title</th>
-                            <th>Price</th>
-                            <th>Discount</th>
-                            <th>Orders</th>
-                            <th>Rate</th>
-                            <th>Image</th>
-                            <th>Link</th>
+                            <th class="px-4 py-3">Product ID</th>
+                            <th class="px-4 py-3">Product Title</th>
+                            <th class="px-4 py-3">Price</th>
+                            <th class="px-4 py-3">Currency</th>
+                            <th class="px-4 py-3">Discount</th>
+                            <th class="px-4 py-3">Orders</th>
+                            <th class="px-4 py-3">Rate</th>
+                            <th class="px-4 py-3">Image</th>
+                            <th class="px-4 py-3">Link</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for product in products %}
-                            <tr>
-                                <td>
-                                    <a href="{% url 'product_detail_view' product.product_id %}">{{ product.product_id }}</a>
+                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 transition duration-300">
+                                <td class="px-4 py-3">
+                                    <a href="{% url 'product_detail_view' product.product_id %}"
+                                       class="text-blue-600 font-medium hover:underline">{{ product.product_id }}</a>
                                 </td>
-                                <td>{{ product.product_title }}</td>
-                                <td>{{ product.sale_price }} {{ product.currency }}</td>
-                                <td>{{ product.discount }}</td>
-                                <td>{{ product.lastest_volume }}</td>
-                                <td>{{ product.evaluate_rate }}</td>
-                                <td>
+                                <td class="px-4 py-3">{{ product.product_title }}</td>
+                                <td class="px-4 py-3">{{ product.sale_price }}</td>
+                                <td class="px-4 py-3">{{ product.sale_price_currency }}</td>
+                                <td class="px-4 py-3">{{ product.discount }}</td>
+                                <td class="px-4 py-3">{{ product.lastest_volume }}</td>
+                                <td class="px-4 py-3">{{ product.evaluate_rate }}</td>
+                                <td class="px-4 py-3">
                                     <img src="{{ product.product_main_image_url }}"
                                          alt="Product Image"
-                                         class="img-thumbnail"
-                                         width="100"
-                                         height="100">
+                                         class="w-20 h-20 rounded-lg object-cover">
                                 </td>
-                                <td>
+                                <td class="px-4 py-3">
                                     <a href="{{ product.product_detail_url }}"
                                        target="_blank"
-                                       class="btn btn-sm btn-primary">View Product</a>
+                                       class="text-blue-600 font-medium hover:underline">View Product</a>
                                 </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                <!-- Paginação -->
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        {% if current_page > 1 %}
-                            <li class="page-item">
-                                <a class="page-link"
-                                   href="?page={{ current_page|add:-1 }}"
-                                   aria-label="Previous">
-                                    <span aria-hidden="true">&laquo</span>
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% for num in page_range %}
-                            <li class="page-item {% if current_page == num %}active{% endif %}">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endfor %}
-                        {% if current_page < total_pages %}
-                            <li class="page-item">
-                                <a class="page-link"
-                                   href="?page={{ current_page|add:1 }}"
-                                   aria-label="Next">
-                                    <span aria-hidden="true">&raquo</span>
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
             </div>
+            <!-- Paginação -->
+            <nav aria-label="Page navigation" class="mt-6">
+                <ul class="flex justify-center space-x-2">
+                    {% if current_page > 1 %}
+                        <li>
+                            <a href="?page=1&category={{ selected_category }}"
+                               class="inline-block py-2 px-4 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300"
+                               aria-label="First">&laquo;</a>
+                        </li>
+                        <li>
+                            <a href="?page={{ current_page|add:'-1' }}&category={{ selected_category }}"
+                               class="inline-block py-2 px-4 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300"
+                               aria-label="Previous">&lsaquo;</a>
+                        </li>
+                    {% endif %}
+                    {% for num in page_range %}
+                        {% if num == current_page %}
+                            <li class="inline-block py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg">{{ num }}</li>
+                        {% elif num > current_page|add:'-5' and num < current_page|add:'5' %}
+                            <li>
+                                <a href="?page={{ num }}&category={{ selected_category }}"
+                                   class="inline-block py-2 px-4 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if current_page < total_pages %}
+                        <li>
+                            <a href="?page={{ current_page|add:'1' }}&category={{ selected_category }}"
+                               class="inline-block py-2 px-4 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300"
+                               aria-label="Next">&rsaquo;</a>
+                        </li>
+                        <li>
+                            <a href="?page={{ total_pages }}&category={{ selected_category }}"
+                               class="inline-block py-2 px-4 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-300"
+                               aria-label="Last">&raquo;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
         {% else %}
-            <p>No products found in the feed.</p>
+            <p class="text-red-600 font-semibold mt-4">No products found for this feed.</p>
         {% endif %}
     </div>
 {% endblock %}
